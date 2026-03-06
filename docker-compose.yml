@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  # ─── PostgreSQL ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ultimate_db
+      POSTGRES_USER: ultimate
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ultimate_dev}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ultimate -d ultimate_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── NestJS API (dev — hot reload) ───────────────────────────────────────────
+  api:
+    build:
+      context: ./apps/api
+      target: development
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://ultimate:${POSTGRES_PASSWORD:-ultimate_dev}@postgres:5432/ultimate_db
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_in_production}
+      NODE_ENV: development
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app          # hot-reload: host code overlays container
+      - /app/node_modules        # anonymous vol keeps container's node_modules
+
+volumes:
+  postgres_data:

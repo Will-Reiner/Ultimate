@@ -32,6 +32,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
@@ -39,3 +40,14 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# ─── Monorepo ──────────────────────────────────────────────────────────────────
+
+# API build output
+apps/api/dist/
+
+# Prisma generated client (regenerated via `prisma generate`)
+apps/api/node_modules/.prisma/
+
+# Coverage
+coverage/
