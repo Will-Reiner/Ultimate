@@ -7,6 +7,7 @@ import {
   IsBoolean,
   Min,
   Max,
+  Matches,
 } from 'class-validator';
 
 export class UpdateHabitDto {
@@ -22,9 +23,13 @@ export class UpdateHabitDto {
   @IsOptional()
   emoji?: string;
 
-  @IsEnum(['daily', 'weekly', 'custom'])
+  @IsEnum(['build', 'quit'])
   @IsOptional()
-  frequency_type?: 'daily' | 'weekly' | 'custom';
+  type?: 'build' | 'quit';
+
+  @IsEnum(['daily', 'weekly'])
+  @IsOptional()
+  frequency_type?: 'daily' | 'weekly';
 
   @IsArray()
   @IsInt({ each: true })
@@ -32,6 +37,19 @@ export class UpdateHabitDto {
   @Max(6, { each: true })
   @IsOptional()
   days_of_week?: number[];
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  goal_value?: number;
+
+  @IsString()
+  @IsOptional()
+  goal_unit?: string;
+
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'reminder_time must be in HH:mm format' })
+  @IsOptional()
+  reminder_time?: string;
 
   @IsString()
   @IsOptional()

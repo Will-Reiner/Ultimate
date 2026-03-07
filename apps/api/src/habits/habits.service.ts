@@ -16,8 +16,12 @@ function toHabitResponse(habit: Habit) {
     title: habit.title,
     description: habit.description ?? null,
     emoji: habit.emoji ?? null,
+    type: habit.type,
     frequency_type: habit.frequencyType,
     days_of_week: habit.daysOfWeek,
+    goal_value: habit.goalValue ?? null,
+    goal_unit: habit.goalUnit ?? null,
+    reminder_time: habit.reminderTime ?? null,
     color: habit.color ?? null,
     is_archived: habit.isArchived,
     created_at: habit.createdAt.toISOString(),
@@ -30,6 +34,7 @@ function toEntryResponse(entry: HabitEntry) {
     id: entry.id,
     habit_id: entry.habitId,
     completed_at: entry.completedAt.toISOString(),
+    value: entry.value,
     note: entry.note ?? null,
   };
 }
@@ -59,8 +64,12 @@ export class HabitsService {
         title: dto.title,
         description: dto.description,
         emoji: dto.emoji,
+        type: dto.type ?? 'build',
         frequencyType: dto.frequency_type,
         daysOfWeek: dto.days_of_week ?? [],
+        goalValue: dto.goal_value,
+        goalUnit: dto.goal_unit,
+        reminderTime: dto.reminder_time,
         color: dto.color,
       },
     });
@@ -75,8 +84,12 @@ export class HabitsService {
         ...(dto.title !== undefined && { title: dto.title }),
         ...(dto.description !== undefined && { description: dto.description }),
         ...(dto.emoji !== undefined && { emoji: dto.emoji }),
+        ...(dto.type !== undefined && { type: dto.type }),
         ...(dto.frequency_type !== undefined && { frequencyType: dto.frequency_type }),
         ...(dto.days_of_week !== undefined && { daysOfWeek: dto.days_of_week }),
+        ...(dto.goal_value !== undefined && { goalValue: dto.goal_value }),
+        ...(dto.goal_unit !== undefined && { goalUnit: dto.goal_unit }),
+        ...(dto.reminder_time !== undefined && { reminderTime: dto.reminder_time }),
         ...(dto.color !== undefined && { color: dto.color }),
         ...(dto.is_archived !== undefined && { isArchived: dto.is_archived }),
       },
@@ -113,7 +126,7 @@ export class HabitsService {
     if (existing) throw new ConflictException('Hábito já foi completado hoje.');
 
     const entry = await this.prisma.habitEntry.create({
-      data: { habitId, completedAt, note: dto.note },
+      data: { habitId, completedAt, value: dto.value ?? 1, note: dto.note },
     });
     return toEntryResponse(entry);
   }

@@ -1,7 +1,6 @@
 import { CreateHabitUseCase, ListHabitsUseCase } from './HabitUseCases';
 import { IHabitRepository } from '@domain/habit/repositories/IHabitRepository';
 import { Habit } from '@domain/habit/entities/Habit';
-import { HabitErrors } from '@domain/habit/errors/HabitErrors';
 
 const now = new Date('2026-01-01');
 
@@ -14,6 +13,7 @@ function makeMockRepo(): jest.Mocked<IHabitRepository> {
     delete: jest.fn(),
     saveEntry: jest.fn(),
     findEntriesByHabitId: jest.fn(),
+    findEntriesByHabitIdForMonth: jest.fn(),
     findEntryForToday: jest.fn(),
   };
 }
@@ -26,11 +26,13 @@ describe('CreateHabitUseCase', () => {
     const result = await useCase.execute({
       userId: 'user-1',
       title: 'Meditar',
+      type: 'build',
       frequency: { type: 'daily' },
     });
 
     expect(result.title).toBe('Meditar');
     expect(result.userId).toBe('user-1');
+    expect(result.type).toBe('build');
     expect(result.isArchived).toBe(false);
     expect(typeof result.id).toBe('string');
     expect(repo.save).toHaveBeenCalledTimes(1);
@@ -41,7 +43,7 @@ describe('CreateHabitUseCase', () => {
     const useCase = new CreateHabitUseCase(repo);
 
     await expect(
-      useCase.execute({ userId: 'user-1', title: '  ', frequency: { type: 'daily' } }),
+      useCase.execute({ userId: 'user-1', title: '  ', type: 'build', frequency: { type: 'daily' } }),
     ).rejects.toThrow(expect.objectContaining({ code: 'INVALID_HABIT_TITLE' }));
 
     expect(repo.save).not.toHaveBeenCalled();
@@ -55,6 +57,7 @@ describe('ListHabitsUseCase', () => {
       id: 'habit-1',
       userId: 'user-1',
       title: 'Ler',
+      type: 'build',
       frequency: { type: 'daily' },
       isArchived: false,
       createdAt: now,
@@ -67,6 +70,7 @@ describe('ListHabitsUseCase', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].title).toBe('Ler');
+    expect(result[0].type).toBe('build');
     expect(repo.findAllByUserId).toHaveBeenCalledWith('user-1');
   });
 

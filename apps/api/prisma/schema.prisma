@@ -26,8 +26,12 @@ model Habit {
   title         String
   description   String?
   emoji         String?
+  type          String       @default("build")
   frequencyType String       @map("frequency_type")
   daysOfWeek    Int[]        @map("days_of_week")
+  goalValue     Int?         @map("goal_value")
+  goalUnit      String?      @map("goal_unit")
+  reminderTime  String?      @map("reminder_time")
   color         String?
   isArchived    Boolean      @default(false) @map("is_archived")
   createdAt     DateTime     @default(now()) @map("created_at")
@@ -42,6 +46,7 @@ model HabitEntry {
   id          String   @id @default(uuid())
   habitId     String   @map("habit_id")
   completedAt DateTime @map("completed_at")
+  value       Int      @default(1)
   note        String?
   habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
 

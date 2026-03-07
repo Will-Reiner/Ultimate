@@ -1,5 +1,5 @@
 import { IHabitRepository } from '@domain/habit/repositories/IHabitRepository';
-import { Habit } from '@domain/habit/entities/Habit';
+import { Habit, HabitType } from '@domain/habit/entities/Habit';
 import { HabitEntry } from '@domain/habit/entities/HabitEntry';
 import { ID } from '@shared/types';
 import { HttpClient } from '../http/HttpClient';
@@ -10,8 +10,12 @@ interface ApiHabit {
   title: string;
   description?: string;
   emoji?: string;
+  type: string;
   frequency_type: string;
   days_of_week?: number[];
+  goal_value?: number | null;
+  goal_unit?: string | null;
+  reminder_time?: string | null;
   color?: string;
   is_archived: boolean;
   created_at: string;
@@ -22,6 +26,7 @@ interface ApiEntry {
   id: string;
   habit_id: string;
   completed_at: string;
+  value: number;
   note?: string;
 }
 
@@ -38,7 +43,6 @@ export class HabitRepositoryImpl implements IHabitRepository {
   }
 
   async findAllByUserId(_userId: ID): Promise<Habit[]> {
-    // user_id is derived from the JWT on the server side
     const data = await this.http.get<ApiHabit[]>('/habits');
     return data.map(this.mapToEntity);
   }
@@ -48,8 +52,12 @@ export class HabitRepositoryImpl implements IHabitRepository {
       title: habit.title,
       description: habit.description,
       emoji: habit.emoji,
+      type: habit.type,
       frequency_type: habit.frequency.type,
       days_of_week: habit.frequency.daysOfWeek ?? [],
+      goal_value: habit.goalValue,
+      goal_unit: habit.goalUnit,
+      reminder_time: habit.reminderTime,
       color: habit.color,
     });
     return this.mapToEntity(data);
@@ -64,7 +72,11 @@ export class HabitRepositoryImpl implements IHabitRepository {
   }
 
   async saveEntry(entry: HabitEntry): Promise<void> {
-    await this.http.post(`/habits/${entry.habitId}/entries`, entry.toJSON());
+    await this.http.post(`/habits/${entry.habitId}/entries`, {
+      completed_at: entry.completedAt.toISOString(),
+      value: entry.value,
+      note: entry.note,
+    });
   }
 
   async findEntriesByHabitId(habitId: ID, from: Date, to: Date): Promise<HabitEntry[]> {
@@ -72,6 +84,12 @@ export class HabitRepositoryImpl implements IHabitRepository {
       `/habits/${habitId}/entries?from=${from.toISOString()}&to=${to.toISOString()}`,
     );
     return data.map(this.mapEntryToEntity);
+  }
+
+  async findEntriesByHabitIdForMonth(habitId: ID, year: number, month: number): Promise<HabitEntry[]> {
+    const from = new Date(year, month, 1);
+    const to = new Date(year, month + 1, 1);
+    return this.findEntriesByHabitId(habitId, from, to);
   }
 
   async findEntryForToday(habitId: ID): Promise<HabitEntry | null> {
@@ -91,10 +109,14 @@ export class HabitRepositoryImpl implements IHabitRepository {
       title: raw.title,
       description: raw.description,
       emoji: raw.emoji,
+      type: (raw.type || 'build') as HabitType,
       frequency: {
-        type: raw.frequency_type as 'daily' | 'weekly' | 'custom',
+        type: raw.frequency_type as 'daily' | 'weekly',
         daysOfWeek: raw.days_of_week,
       },
+      goalValue: raw.goal_value ?? undefined,
+      goalUnit: raw.goal_unit ?? undefined,
+      reminderTime: raw.reminder_time ?? undefined,
       color: raw.color,
       isArchived: raw.is_archived,
       createdAt: new Date(raw.created_at),
@@ -107,8 +129,12 @@ export class HabitRepositoryImpl implements IHabitRepository {
       title: habit.title,
       description: habit.description,
       emoji: habit.emoji,
+      type: habit.type,
       frequency_type: habit.frequency.type,
       days_of_week: habit.frequency.daysOfWeek ?? [],
+      goal_value: habit.goalValue,
+      goal_unit: habit.goalUnit,
+      reminder_time: habit.reminderTime,
       color: habit.color,
       is_archived: habit.isArchived,
     };
@@ -119,6 +145,7 @@ export class HabitRepositoryImpl implements IHabitRepository {
       id: raw.id,
       habitId: raw.habit_id,
       completedAt: new Date(raw.completed_at),
+      value: raw.value ?? 1,
       note: raw.note,
     });
   }

@@ -10,7 +10,11 @@ function toDTO(habit: Habit): HabitDTO {
     title: habit.title,
     description: habit.description,
     emoji: habit.emoji,
+    type: habit.type,
     frequency: habit.frequency.toJSON(),
+    goalValue: habit.goalValue,
+    goalUnit: habit.goalUnit,
+    reminderTime: habit.reminderTime,
     color: habit.color,
     isArchived: habit.isArchived,
     createdAt: habit.createdAt.toISOString(),
@@ -18,18 +22,24 @@ function toDTO(habit: Habit): HabitDTO {
   };
 }
 
+export { toDTO };
+
 export class CreateHabitUseCase {
   constructor(private readonly habitRepository: IHabitRepository) {}
 
   async execute(input: CreateHabitInput): Promise<HabitDTO> {
     const now = new Date();
     const habit = Habit.create({
-      id: 'pending', // replaced by server-generated ID after save
+      id: 'pending',
       userId: input.userId,
       title: input.title,
       description: input.description,
       emoji: input.emoji,
+      type: input.type,
       frequency: input.frequency,
+      goalValue: input.goalValue,
+      goalUnit: input.goalUnit,
+      reminderTime: input.reminderTime,
       color: input.color,
       isArchived: false,
       createdAt: now,

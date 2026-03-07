@@ -1,6 +1,6 @@
 import { HabitErrors } from '../errors/HabitErrors';
 
-export type FrequencyType = 'daily' | 'weekly' | 'custom';
+export type FrequencyType = 'daily' | 'weekly';
 
 export interface FrequencyProps {
   type: FrequencyType;
@@ -12,7 +12,7 @@ export class Frequency {
   private constructor(private readonly props: FrequencyProps) {}
 
   static create(props: FrequencyProps): Frequency {
-    if (!['daily', 'weekly', 'custom'].includes(props.type)) {
+    if (!['daily', 'weekly'].includes(props.type)) {
       throw HabitErrors.invalidFrequency();
     }
 

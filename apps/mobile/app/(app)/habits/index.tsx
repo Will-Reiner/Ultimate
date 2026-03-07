@@ -2,24 +2,22 @@ import React from 'react';
 import {
   View,
   Text,
-  FlatList,
+  SectionList,
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useHabits } from '@presentation/hooks/useHabits';
-import { useAuth } from '@presentation/hooks/useAuth';
 import { HabitDTO } from '@application/habit/dtos/HabitDTO';
 
 export default function HabitsScreen() {
-  const { habits, isLoading, todaysHabits, refresh } = useHabits();
-  const { user, logout } = useAuth();
+  const { buildHabits, quitHabits, isLoading, habits, refresh } = useHabits();
 
-  function handleLogout() {
-    logout();
-    router.replace('/(auth)/login');
-  }
+  const sections = [
+    ...(buildHabits.length > 0 ? [{ title: 'Construir', data: buildHabits }] : []),
+    ...(quitHabits.length > 0 ? [{ title: 'Largar', data: quitHabits }] : []),
+  ];
 
   if (isLoading && habits.length === 0) {
     return (
@@ -31,31 +29,10 @@ export default function HabitsScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-white px-6 pt-14 pb-4 shadow-sm">
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-2xl font-bold text-gray-900">
-              Olá, {user?.name?.split(' ')[0]} 👋
-            </Text>
-            <Text className="text-sm text-gray-500 mt-1">
-              {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </Text>
-          </View>
-          <TouchableOpacity
-            className="bg-gray-100 rounded-full px-4 py-2"
-            onPress={handleLogout}
-          >
-            <Text className="text-gray-600 text-sm font-medium">Sair</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Habit list */}
-      <FlatList
-        data={todaysHabits}
+      <SectionList
+        sections={sections}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="px-6 py-4"
+        contentContainerClassName="px-6 pt-14 pb-4"
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
@@ -67,14 +44,22 @@ export default function HabitsScreen() {
         ListEmptyComponent={
           <View className="items-center justify-center py-20">
             <Text className="text-4xl mb-4">🌱</Text>
-            <Text className="text-lg font-semibold text-gray-700">Nenhum hábito ainda</Text>
+            <Text className="text-lg font-semibold text-gray-700">Nenhum habito ainda</Text>
             <Text className="text-sm text-gray-400 mt-2 text-center">
-              Crie seu primeiro hábito para começar sua rotina.
+              Crie seu primeiro habito para comecar sua rotina.
             </Text>
           </View>
         }
+        renderSectionHeader={({ section: { title } }) => (
+          <View className="pt-4 pb-2">
+            <Text className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              {title}
+            </Text>
+          </View>
+        )}
         renderItem={({ item }) => <HabitCard habit={item} />}
         ListFooterComponent={<View className="h-24" />}
+        stickySectionHeadersEnabled={false}
       />
 
       {/* FAB */}
@@ -89,6 +74,8 @@ export default function HabitsScreen() {
 }
 
 function HabitCard({ habit }: { habit: HabitDTO }) {
+  const isBuild = habit.type === 'build';
+
   return (
     <TouchableOpacity
       className="bg-white rounded-2xl p-4 mb-3 shadow-sm active:opacity-80"
@@ -99,18 +86,23 @@ function HabitCard({ habit }: { habit: HabitDTO }) {
           className="w-12 h-12 rounded-xl items-center justify-center mr-4"
           style={{ backgroundColor: habit.color ?? '#e0eaff' }}
         >
-          <Text className="text-2xl">{habit.emoji ?? '✨'}</Text>
+          <Text className="text-2xl">{habit.emoji ?? (isBuild ? '✨' : '🚫')}</Text>
         </View>
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-900">{habit.title}</Text>
-          {habit.description ? (
-            <Text className="text-sm text-gray-500 mt-0.5" numberOfLines={1}>
-              {habit.description}
+          {isBuild && habit.goalValue ? (
+            <Text className="text-sm text-gray-500 mt-0.5">
+              Meta: {habit.goalValue} {habit.goalUnit ?? ''}
+            </Text>
+          ) : null}
+          {!isBuild ? (
+            <Text className="text-sm text-gray-500 mt-0.5">
+              Manter o foco
             </Text>
           ) : null}
         </View>
         <View className="ml-2">
-          <Text className="text-gray-300 text-lg">›</Text>
+          <Text className="text-gray-300 text-lg">{'>'}</Text>
         </View>
       </View>
     </TouchableOpacity>

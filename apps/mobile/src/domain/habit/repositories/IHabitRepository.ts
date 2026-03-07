@@ -12,5 +12,6 @@ export interface IHabitRepository {
   // Entries
   saveEntry(entry: HabitEntry): Promise<void>;
   findEntriesByHabitId(habitId: ID, from: Date, to: Date): Promise<HabitEntry[]>;
+  findEntriesByHabitIdForMonth(habitId: ID, year: number, month: number): Promise<HabitEntry[]>;
   findEntryForToday(habitId: ID): Promise<HabitEntry | null>;
 }
