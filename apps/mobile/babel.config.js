@@ -19,7 +19,6 @@ module.exports = function (api) {
           extensions: ['.ios.ts', '.android.ts', '.ts', '.ios.tsx', '.android.tsx', '.tsx', '.json'],
         },
       ],
-      'nativewind/babel',
     ],
   };
 };
