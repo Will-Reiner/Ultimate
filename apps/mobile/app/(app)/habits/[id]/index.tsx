@@ -8,8 +8,8 @@ import {
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useHabits } from '@presentation/hooks/useHabits';
-import { Button } from '@presentation/components/ui/Button';
+import { useHabits } from '@hooks/useHabits';
+import { Button } from '@components/ui/Button';
 
 const MONTH_NAMES = [
   'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',

@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
-import { useHabits } from '@presentation/hooks/useHabits';
-import { HabitDTO } from '@application/habit/dtos/HabitDTO';
+import { useHabits } from '@hooks/useHabits';
+import { HabitDTO } from '@app-types/habit';
 
 export default function HabitsScreen() {
   const { buildHabits, quitHabits, isLoading, habits, refresh } = useHabits();

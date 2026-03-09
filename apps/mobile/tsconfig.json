@@ -7,20 +7,23 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@domain/*": [
-        "src/domain/*"
+      "@app-types/*": [
+        "src/types/*"
       ],
-      "@application/*": [
-        "src/application/*"
+      "@services/*": [
+        "src/services/*"
       ],
-      "@infrastructure/*": [
-        "src/infrastructure/*"
+      "@storage/*": [
+        "src/storage/*"
       ],
-      "@presentation/*": [
-        "src/presentation/*"
+      "@stores/*": [
+        "src/stores/*"
       ],
-      "@shared/*": [
-        "src/shared/*"
+      "@hooks/*": [
+        "src/hooks/*"
+      ],
+      "@components/*": [
+        "src/components/*"
       ]
     }
   },

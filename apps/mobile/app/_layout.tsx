@@ -4,7 +4,7 @@ import '../global.css';
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useAuth } from '@presentation/hooks/useAuth';
+import { useAuth } from '@hooks/useAuth';
 
 export default function RootLayout() {
   const { hydrate } = useAuth();

@@ -7,11 +7,10 @@ import {
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useHabits } from '@presentation/hooks/useHabits';
-import { Button } from '@presentation/components/ui/Button';
-import { Input } from '@presentation/components/ui/Input';
-import { HabitType } from '@domain/habit/entities/Habit';
-import { FrequencyType } from '@domain/habit/value-objects/Frequency';
+import { useHabits } from '@hooks/useHabits';
+import { Button } from '@components/ui/Button';
+import { Input } from '@components/ui/Input';
+import { HabitType, FrequencyType } from '@app-types/habit';
 
 const COLORS = ['#e0eaff', '#dbeafe', '#d1fae5', '#fef3c7', '#fce7f3', '#ede9fe', '#fee2e2'];
 const EMOJIS_BUILD = ['💪', '📚', '🧘', '🏃', '💧', '🥗', '✍️', '🎯'];

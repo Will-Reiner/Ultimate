@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Link, router } from 'expo-router';
-import { useAuth } from '@presentation/hooks/useAuth';
-import { Button } from '@presentation/components/ui/Button';
-import { Input } from '@presentation/components/ui/Input';
+import { useAuth } from '@hooks/useAuth';
+import { Button } from '@components/ui/Button';
+import { Input } from '@components/ui/Input';
 
 export default function LoginScreen() {
   const { login, isLoading, error } = useAuth();
