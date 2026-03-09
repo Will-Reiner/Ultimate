@@ -31,13 +31,9 @@ Ultimate/                       ← raiz do monorepo
 | Token | expo-secure-store |
 | Testes | Jest + ts-jest |
 
-### Arquitetura — Clean Architecture + DDD
+### Arquitetura — Flat Client
 
-```
-Presentation  →  Application  →  Domain  ←  (interfaces apenas)
-     ↑               ↑
-Infrastructure  ──────────────────────────→  (implementa interfaces do Domain)
-```
+O mobile é um cliente REST puro (sem modo offline). Toda a lógica de negócio vive no backend. A estrutura reflete isso: sem camadas DDD — apenas tipos, serviços de API, estado (Zustand) e UI.
 
 ### Estrutura de Diretórios
 
@@ -47,22 +43,25 @@ apps/mobile/
 │   ├── _layout.tsx
 │   ├── index.tsx
 │   ├── (auth)/login.tsx + register.tsx
-│   └── (app)/habits/index.tsx + [id].tsx
+│   └── (app)/habits/index.tsx + new.tsx + [id]/index.tsx + [id]/edit.tsx
 ├── src/
-│   ├── domain/                     ← puro TS, sem deps externas
-│   │   ├── user/entities/User.ts + User.spec.ts
-│   │   └── habit/entities/Habit.ts + Habit.spec.ts + HabitEntry.ts
-│   ├── application/                ← use cases + DTOs
-│   │   ├── user/use-cases/LoginUseCase.ts + .spec.ts + RegisterUseCase.ts
-│   │   └── habit/use-cases/HabitUseCases.ts + .spec.ts + CompleteHabitUseCase.ts
-│   ├── infrastructure/             ← implementações concretas
-│   │   ├── http/HttpClient.ts + ApiClient.ts
-│   │   ├── repositories/UserRepositoryImpl.ts + HabitRepositoryImpl.ts
-│   │   └── storage/TokenStorage.ts
-│   └── presentation/               ← React Native
-│       ├── stores/authStore.ts + habitStore.ts
-│       ├── hooks/useAuth.ts + useHabits.ts
-│       └── components/ui/Button.tsx + Input.tsx
+│   ├── types/                      ← interfaces puras (DTOs da API)
+│   │   ├── user.ts                 ← UserDTO, AuthResultDTO
+│   │   └── habit.ts                ← HabitDTO, HabitDetailDTO, HabitType, etc.
+│   ├── services/                   ← chamadas HTTP + mapeamento de resposta
+│   │   ├── api.ts                  ← ApiClient (axios) + ApiError
+│   │   ├── authService.ts          ← login(), register()
+│   │   └── habitService.ts         ← CRUD de hábitos + streak calculation
+│   ├── storage/
+│   │   └── TokenStorage.ts         ← expo-secure-store
+│   ├── stores/                     ← Zustand (estado reativo)
+│   │   ├── authStore.ts
+│   │   └── habitStore.ts
+│   ├── hooks/
+│   │   ├── useAuth.ts
+│   │   └── useHabits.ts
+│   └── components/
+│       └── ui/Button.tsx + Input.tsx
 └── .env.example                    ← EXPO_PUBLIC_API_URL=http://localhost:3000
 ```
 
@@ -70,11 +69,12 @@ apps/mobile/
 
 | Alias | Resolve para |
 |---|---|
-| `@domain/*` | `src/domain/*` |
-| `@application/*` | `src/application/*` |
-| `@infrastructure/*` | `src/infrastructure/*` |
-| `@presentation/*` | `src/presentation/*` |
-| `@shared/*` | `src/shared/*` |
+| `@app-types/*` | `src/types/*` |
+| `@services/*` | `src/services/*` |
+| `@storage/*` | `src/storage/*` |
+| `@stores/*` | `src/stores/*` |
+| `@hooks/*` | `src/hooks/*` |
+| `@components/*` | `src/components/*` |
 
 ### Comandos (dentro de `apps/mobile/`)
 
@@ -108,10 +108,45 @@ apps/api/
 ├── src/
 │   ├── main.ts
 │   ├── app.module.ts
-│   ├── prisma/        ← PrismaService (@Global)
-│   ├── users/         ← UsersService
-│   ├── auth/          ← POST /auth/login|register + JWT strategy
-│   └── habits/        ← /habits CRUD + /habits/:id/entries
+│   ├── prisma/                        ← PrismaService (@Global, inalterado)
+│   └── modules/
+│       ├── user/
+│       │   ├── domain/
+│       │   │   ├── entities/User.ts
+│       │   │   ├── repositories/IUserRepository.ts
+│       │   │   └── errors/UserErrors.ts
+│       │   ├── application/
+│       │   │   ├── use-cases/FindUserByEmailUseCase.ts + FindUserByIdUseCase.ts + CreateUserUseCase.ts
+│       │   │   └── dtos/UserResponseDto.ts
+│       │   ├── infrastructure/
+│       │   │   ├── repositories/UserRepositoryImpl.ts  ← Prisma
+│       │   │   └── services/PasswordService.ts         ← bcrypt
+│       │   └── presentation/
+│       │       └── users.module.ts    ← sem controller (módulo de suporte)
+│       ├── auth/
+│       │   ├── application/
+│       │   │   ├── use-cases/LoginUseCase.ts + RegisterUseCase.ts
+│       │   │   └── dtos/AuthResponseDto.ts
+│       │   └── presentation/
+│       │       ├── auth.module.ts + auth.controller.ts + auth.service.ts
+│       │       ├── dtos/login.dto.ts + register.dto.ts
+│       │       ├── guards/jwt-auth.guard.ts
+│       │       └── strategies/jwt.strategy.ts
+│       └── habit/
+│           ├── domain/
+│           │   ├── entities/Habit.ts + HabitEntry.ts
+│           │   ├── repositories/IHabitRepository.ts
+│           │   └── errors/HabitErrors.ts
+│           ├── application/
+│           │   ├── use-cases/GetHabitsUseCase.ts + GetHabitUseCase.ts + CreateHabitUseCase.ts
+│           │   │              + UpdateHabitUseCase.ts + DeleteHabitUseCase.ts
+│           │   │              + GetEntriesUseCase.ts + CreateEntryUseCase.ts
+│           │   └── dtos/HabitResponseDto.ts  ← tipos + mappers
+│           ├── infrastructure/
+│           │   └── repositories/HabitRepositoryImpl.ts  ← Prisma
+│           └── presentation/
+│               ├── habits.module.ts + habits.controller.ts + habits.service.ts
+│               └── dtos/create-habit.dto.ts + update-habit.dto.ts + create-entry.dto.ts
 ├── prisma/schema.prisma
 ├── Dockerfile
 └── .env.example
@@ -174,37 +209,44 @@ docker build --target production -t ultimate-api ./apps/api
 
 ## Convenções de Código
 
-### Testes (mobile)
-- `.spec.ts` na **mesma pasta** do arquivo testado
-- **Domain**: sem mocks (regras puras de negócio)
-- **Application**: mocka repositories com `jest.fn()`
+### Stores Zustand (mobile)
+- Finas: só estado reativo + chamada ao service
+- Lógica de negócio e mapeamento ficam nos `services/`
 
-### Entities (mobile)
-- Construtor privado → `Entity.create()` valida, `Entity.restore()` só reconstrói
-- Imutáveis: métodos que "modificam" retornam nova instância
+### Services (mobile)
+- Função pura por operação (`login`, `getHabits`, etc.)
+- Responsáveis por mapear resposta da API para os tipos de `src/types/`
+- Testes: mockar `api` (ApiClient)
 
-### Use Cases (mobile)
-- Recebem interfaces (nunca implementações concretas)
-- Retornam DTOs (nunca entities)
+### Entities do backend (DDD)
+- Construtor privado → `Entity.restore()` reconstrói a partir do Prisma
+- Getters públicos, sem setters
+- Sem dependências do NestJS ou Prisma
 
-### Stores Zustand
-- Finas: só estado reativo + chamada ao use case
-- Lógica de negócio fica nos use cases
+### Use Cases do backend
+- Recebem interfaces (nunca implementações concretas via `@Inject(TOKEN)`)
+- Lançam erros de domínio (`HabitNotFoundError`, etc.); a camada de apresentação converte para exceções NestJS
+- `auth.service.ts` e `habits.service.ts` são façades finas → orquestram use cases
+
+### DTOs de validação (backend)
+- Ficam em `presentation/dtos/` para não poluir application com decorators NestJS
+- DTOs de resposta (tipos puros) ficam em `application/dtos/`
 
 ---
 
 ## Adicionando um Novo Módulo
 
-### Mobile (DDD)
-1. `src/domain/<modulo>/entities/`, `repositories/`, `errors/`
-2. `src/application/<modulo>/use-cases/` + `dtos/`
-3. `src/infrastructure/repositories/<Modulo>RepositoryImpl.ts`
-4. `src/presentation/stores/<modulo>Store.ts` + `hooks/use<Modulo>.ts`
-5. `app/(app)/<modulo>/index.tsx`
-6. `.spec.ts` ao lado de cada use case e entity
+### Mobile
+1. Tipos em `src/types/<modulo>.ts`
+2. Chamadas HTTP em `src/services/<modulo>Service.ts`
+3. Store em `src/stores/<modulo>Store.ts`
+4. Hook em `src/hooks/use<Modulo>.ts`
+5. Telas em `app/(app)/<modulo>/`
 
-### API (NestJS)
+### API (NestJS + DDD)
 1. Model em `prisma/schema.prisma` + `npm run migrate`
-2. `src/<modulo>/<modulo>.module.ts|service.ts|controller.ts`
-3. `src/<modulo>/dto/*.ts`
-4. Importar módulo em `app.module.ts`
+2. `src/modules/<modulo>/domain/` → entities, IRepository, errors
+3. `src/modules/<modulo>/application/` → use cases + dtos de resposta
+4. `src/modules/<modulo>/infrastructure/repositories/<Modulo>RepositoryImpl.ts`
+5. `src/modules/<modulo>/presentation/` → module, controller, service (façade), dtos de input
+6. Importar o novo `<Modulo>Module` em `app.module.ts`
