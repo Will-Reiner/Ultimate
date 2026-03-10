@@ -166,6 +166,13 @@ export class InvalidBudgetLimitError extends Error {
   }
 }
 
+export class InvalidBudgetMonthError extends Error {
+  constructor(month: string) {
+    super(`Mes do orcamento invalido: ${month}. Formato esperado: YYYY-MM`);
+    this.name = 'InvalidBudgetMonthError';
+  }
+}
+
 export class InvalidCategoryLimitError extends Error {
   constructor(reason: string) {
     super(`Limite por categoria invalido: ${reason}`);
