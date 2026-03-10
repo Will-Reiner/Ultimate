@@ -31,3 +31,22 @@ Implementacao completa da camada de dominio do modulo Calendario & Reunioes (cal
 - **Entidade StudyEvent**: vinculado a item de estudo, Google sync
 - **Erros**: 10 classes de erro (InvalidEventTitle, InvalidEventTimeRange, InvalidReminderMinutes, InvalidParticipantName/Email, InvalidRecurrence, InvalidTimeFormat, InvalidDaysOfWeek, MeetingNotFound, PersonalEventNotFound)
 - **Testes**: 150 testes — EventReminder (4), Participant (6), Recurrence (27), Meeting (32), PersonalEvent (13), TaskEvent (25), HabitEvent (23), StudyEvent (20)
+
+## Implementacao 2026-03-09 (sessao 3)
+
+### Resumo
+
+Implementacao completa da camada de dominio do modulo Projetos & Tarefas (task) seguindo TDD — 149 testes.
+
+### Detalhes
+
+- **Erros de dominio**: 16 classes de erro em `TaskErrors.ts` (ProjectNotFound, InvalidProjectName, TaskNotFound, InvalidTaskTitle, InvalidPriority, InvalidTaskStatus, DuplicateTaskStatusName, ImmutableDefaultStatus, InvalidTaskTagName, DuplicateTaskTagName, InvalidTaskNoteContent, TaskNoteNotFound, InvalidTaskReminder, TaskReminderNotFound, InvalidSubtask, InvalidProjectStatusTransition, InvalidTaskStatusAssignment)
+- **Value Object Priority**: niveis none/low/medium/high/urgent, weight numerico para ordenacao, isHigherThan para comparacao
+- **Value Object TaskStatus**: types globais (todo/in_progress/done), status customizados por projeto, createDefaults() para os 3 fixos, isDone()
+- **Entidade TaskTag**: create/restore, updateName/updateColor com updatedAt, validacao de nome
+- **Entidade TaskNote**: create/restore, updateContent com updatedAt, validacao de conteudo
+- **Entidade TaskReminder**: create com validacao de data futura, syncsToCalendar default true, setCalendarEventId/clearCalendarEventId (sync real fica no use case)
+- **Entidade Task (aggregate root)**: criacao com defaults (status to_do, priority none), subtarefas (max 1 nivel, herda projectId), edicao completa (titulo, descricao, prioridade, status, deadline, assignee, estimativa, tags, order), validacao de status (globais + customizados do projeto), completedAt automatico ao mudar para done, isOverdue/isUpcoming, copia defensiva de tags
+- **Entidade Project (aggregate root)**: criacao com defaults (status active, cor/icone padrao, 3 status globais), edicao completa, status customizados (add com validacao duplicata, remove com protecao de defaults, fallback para reatribuicao), calculateProgress, ciclo de vida (complete/archive/reactivate)
+- **Domain Service TaskFilter**: filtros por prioridade, tag (single e AND), status (id e type), deadline (overdue/upcoming/sem deadline), projeto (especifico/soltas), unassigned, combine para filtros compostos, sortByPriority
+- **Testes**: 149 testes — Priority (13), TaskStatus (12), TaskTag (13), TaskNote (10), TaskReminder (13), Task (45), Project (30), TaskFilter (13)
