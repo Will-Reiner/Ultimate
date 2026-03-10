@@ -225,13 +225,13 @@ describe('FinanceCategory', () => {
 
       const names = categories.map((c) => c.name);
       expect(names).toEqual([
-        'Alimentacao',
+        'Alimentação',
         'Transporte',
         'Moradia',
-        'Saude',
-        'Educacao',
+        'Saúde',
+        'Educação',
         'Lazer',
-        'Vestuario',
+        'Vestuário',
         'Assinaturas',
         'Outros',
       ]);
@@ -278,7 +278,7 @@ describe('FinanceCategory', () => {
 
       const names = categories.map((c) => c.name);
       expect(names).toEqual([
-        'Salario',
+        'Salário',
         'Freelance',
         'Investimentos',
         'Outros',

@@ -2,6 +2,7 @@ import { Account, AccountType } from '../entities/Account';
 import {
   InvalidAccountNameError,
   InvalidAccountTypeError,
+  InvalidAccountAmountError,
   AccountArchivedError,
 } from '../errors/FinanceErrors';
 
@@ -241,13 +242,13 @@ describe('Account', () => {
     it('deve rejeitar credito com valor zero', () => {
       const account = Account.create(buildValidProps());
 
-      expect(() => account.credit(0)).toThrow();
+      expect(() => account.credit(0)).toThrow(InvalidAccountAmountError);
     });
 
     it('deve rejeitar credito com valor negativo', () => {
       const account = Account.create(buildValidProps());
 
-      expect(() => account.credit(-10)).toThrow();
+      expect(() => account.credit(-10)).toThrow(InvalidAccountAmountError);
     });
 
     it('deve impedir credito em conta arquivada', () => {
@@ -275,13 +276,13 @@ describe('Account', () => {
     it('deve rejeitar debito com valor zero', () => {
       const account = Account.create(buildValidProps());
 
-      expect(() => account.debit(0)).toThrow();
+      expect(() => account.debit(0)).toThrow(InvalidAccountAmountError);
     });
 
     it('deve rejeitar debito com valor negativo', () => {
       const account = Account.create(buildValidProps());
 
-      expect(() => account.debit(-10)).toThrow();
+      expect(() => account.debit(-10)).toThrow(InvalidAccountAmountError);
     });
 
     it('deve impedir debito em conta arquivada', () => {

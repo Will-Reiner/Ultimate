@@ -21,6 +21,13 @@ export class InvalidAccountTypeError extends Error {
   }
 }
 
+export class InvalidAccountAmountError extends Error {
+  constructor(reason: string) {
+    super(`Valor da conta invalido: ${reason}`);
+    this.name = 'InvalidAccountAmountError';
+  }
+}
+
 export class AccountArchivedError extends Error {
   constructor() {
     super('Conta esta arquivada.');

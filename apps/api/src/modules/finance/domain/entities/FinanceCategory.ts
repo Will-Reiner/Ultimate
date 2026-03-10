@@ -35,19 +35,19 @@ interface PredefinedDef {
 }
 
 const PREDEFINED_EXPENSE: PredefinedDef[] = [
-  { name: 'Alimentacao', icon: 'utensils', color: '#FF6B6B' },
+  { name: 'Alimentação', icon: 'utensils', color: '#FF6B6B' },
   { name: 'Transporte', icon: 'car', color: '#4ECDC4' },
   { name: 'Moradia', icon: 'home', color: '#45B7D1' },
-  { name: 'Saude', icon: 'heart-pulse', color: '#96CEB4' },
-  { name: 'Educacao', icon: 'graduation-cap', color: '#FFEAA7' },
+  { name: 'Saúde', icon: 'heart-pulse', color: '#96CEB4' },
+  { name: 'Educação', icon: 'graduation-cap', color: '#FFEAA7' },
   { name: 'Lazer', icon: 'gamepad', color: '#DDA0DD' },
-  { name: 'Vestuario', icon: 'shirt', color: '#98D8C8' },
+  { name: 'Vestuário', icon: 'shirt', color: '#98D8C8' },
   { name: 'Assinaturas', icon: 'credit-card', color: '#F7DC6F' },
   { name: 'Outros', icon: 'ellipsis', color: '#BDC3C7' },
 ];
 
 const PREDEFINED_INCOME: PredefinedDef[] = [
-  { name: 'Salario', icon: 'wallet', color: '#2ECC71' },
+  { name: 'Salário', icon: 'wallet', color: '#2ECC71' },
   { name: 'Freelance', icon: 'laptop', color: '#3498DB' },
   { name: 'Investimentos', icon: 'trending-up', color: '#9B59B6' },
   { name: 'Outros', icon: 'ellipsis', color: '#BDC3C7' },

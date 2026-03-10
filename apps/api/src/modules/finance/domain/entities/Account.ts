@@ -1,6 +1,7 @@
 import {
   InvalidAccountNameError,
   InvalidAccountTypeError,
+  InvalidAccountAmountError,
   AccountArchivedError,
 } from '../errors/FinanceErrors';
 
@@ -114,7 +115,7 @@ export class Account {
   credit(amount: number): void {
     this.ensureActive();
     if (amount <= 0) {
-      throw new Error('Valor do credito deve ser maior que zero.');
+      throw new InvalidAccountAmountError('valor do credito deve ser maior que zero.');
     }
     this._balance += amount;
     this._updatedAt = new Date();
@@ -123,7 +124,7 @@ export class Account {
   debit(amount: number): void {
     this.ensureActive();
     if (amount <= 0) {
-      throw new Error('Valor do debito deve ser maior que zero.');
+      throw new InvalidAccountAmountError('valor do debito deve ser maior que zero.');
     }
     this._balance -= amount;
     this._updatedAt = new Date();
