@@ -250,3 +250,8 @@ docker build --target production -t ultimate-api ./apps/api
 4. `src/modules/<modulo>/infrastructure/repositories/<Modulo>RepositoryImpl.ts`
 5. `src/modules/<modulo>/presentation/` → module, controller, service (façade), dtos de input
 6. Importar o novo `<Modulo>Module` em `app.module.ts`
+
+
+## to do
+- 6-financas.md
+- 7-dashboard-metas.md
