@@ -6,7 +6,8 @@
       "Bash(npx tsc:*)",
       "Bash(npx prisma:*)",
       "mcp__ide__getDiagnostics",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npx jest:*)"
     ]
   }
 }
