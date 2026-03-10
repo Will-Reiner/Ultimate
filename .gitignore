@@ -51,3 +51,4 @@ apps/api/node_modules/.prisma/
 
 # Coverage
 coverage/
+.worktrees/
