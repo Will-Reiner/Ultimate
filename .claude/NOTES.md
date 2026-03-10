@@ -67,3 +67,25 @@ Implementacao completa da camada de dominio do modulo Biblioteca de Estudos (stu
 - **Entidade StudyNote**: conteudo obrigatorio, vinculada a studyItemId, gerenciamento de StudyTags (add/remove), updatedAt automatico ao editar
 - **Entidade StudySession**: scheduledAt + durationMinutes obrigatorios (duracao>0), status scheduled→completed|skipped, calendarEventId para integracao, reschedule para reagendar, completedAt ao completar
 - **Testes**: 91 testes — Progress (10), StudyTag (6), StudyItem (35), Collection (10), StudyNote (12), StudySession (13), sem NENHUMA implementacao pendente (5 restam para use case)
+
+## Implementacao 2026-03-09 (sessao 5)
+
+### Resumo
+
+Implementacao completa da camada de dominio do modulo Financas (finance) seguindo TDD — 386 testes.
+
+### Detalhes
+
+- **Erros de dominio**: 31 classes de erro em `FinanceErrors.ts` — Account (4: NotFound, InvalidName, InvalidType, InvalidAmount, Archived), CreditCard (5: NotFound, InvalidName, InvalidLimit, InvalidClosingDay, InvalidDueDay, Archived), Transaction (4: NotFound, InvalidAmount, InvalidDescription, InvalidSource, InvalidType), Installment (1), TransactionRecurrence (1), Invoice (3: NotFound, InvalidStatusTransition, InvalidPayment), Budget (3: NotFound, InvalidLimit, InvalidMonth, InvalidCategoryLimit), FinancialGoal (4: NotFound, InvalidName, InvalidAmount, InvalidStatusTransition), FinanceTag (1), FinanceCategory (3: InvalidName, InvalidType, PredefinedImmutable)
+- **Value Object CategoryLimit**: create com validacao (limit > 0), restore sem validacao, toJSON
+- **Value Object Installment**: totalInstallments/currentInstallment/installmentAmount/parentTransactionId, validacoes cruzadas (current <= total), totalAmount computado, toJSON
+- **Value Object TransactionRecurrence**: frequencias daily/weekly/monthly/yearly, startDate/endDate (strings YYYY-MM-DD), calculateNextOccurrence com calculo UTC por frequencia, endDate deve ser posterior a startDate, toJSON
+- **Entidade FinanceTag**: nome obrigatorio (max 50 chars, trimmed), cor opcional, updateName/updateColor com updatedAt
+- **Entidade FinanceCategory**: categorias customizadas (create com validacao) e predefinidas (9 despesa: Alimentacao, Transporte, Moradia, Saude, Educacao, Lazer, Vestuario, Assinaturas, Outros; 4 receita: Salario, Freelance, Investimentos, Outros — todas com acentos corretos), guardPredefined impede edicao/exclusao de predefinidas, ensureNotPredefined para delete checks
+- **Entidade Account**: tipos checking/savings/cash/investment/other, balance comeca em 0, credit(amount)/debit(amount) com validacao > 0 usando InvalidAccountAmountError, adjustBalance(newBalance) para override manual, archive/reactivate/ensureActive, saldo pode ficar negativo
+- **Entidade CreditCard**: nome/limit/closingDay(1-31)/dueDay(1-31), calculateAvailableLimit(openInvoiceTotal) = limit - total, archive/reactivate/ensureActive, rejeita dias fracionarios
+- **Entidade Transaction**: tipo income/expense, exatamente uma origem (accountId XOR creditCardId), receita nao pode ser em cartao, installment so em cartao, descricao max 200 chars, tags como string[] com copia defensiva, mutations completas (description, amount, category, date, tags, note)
+- **Entidade Invoice**: status open→closed→paid, totalAmount atualizado por use case via updateTotalAmount(), close() so de open, registerPayment(amount, accountId) so quando closed (acumula paidAmount, auto-paid quando >= totalAmount), reopen() so de closed (reseta paidAmount/paidWithAccountId), remainingAmount computado
+- **Entidade Budget**: mes formato YYYY-MM validado por regex, generalLimit > 0 opcional, categoryLimits (array de CategoryLimit VOs) com add/replace por categoryId e remove, getCategoryLimit, copia defensiva no getter
+- **Entidade FinancialGoal**: nome max 200, targetAmount > 0, status in_progress→completed|failed, updateCurrentAmount auto-completa quando >= targetAmount, calculateProgress (0-100 capped), complete/markFailed so de in_progress, checkDeadline auto-fail se deadline passado, accountIds com dedup e copia defensiva
+- **Testes**: 386 testes — CategoryLimit (6), Installment (13), TransactionRecurrence (17), FinanceTag (20), FinanceCategory (37), Account (49), CreditCard (64), Transaction (50), Invoice (30), Budget (35), FinancialGoal (65)
