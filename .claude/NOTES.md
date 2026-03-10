@@ -50,3 +50,20 @@ Implementacao completa da camada de dominio do modulo Projetos & Tarefas (task) 
 - **Entidade Project (aggregate root)**: criacao com defaults (status active, cor/icone padrao, 3 status globais), edicao completa, status customizados (add com validacao duplicata, remove com protecao de defaults, fallback para reatribuicao), calculateProgress, ciclo de vida (complete/archive/reactivate)
 - **Domain Service TaskFilter**: filtros por prioridade, tag (single e AND), status (id e type), deadline (overdue/upcoming/sem deadline), projeto (especifico/soltas), unassigned, combine para filtros compostos, sortByPriority
 - **Testes**: 149 testes — Priority (13), TaskStatus (12), TaskTag (13), TaskNote (10), TaskReminder (13), Task (45), Project (30), TaskFilter (13)
+
+## Implementacao 2026-03-09 (sessao 4)
+
+### Resumo
+
+Implementacao completa da camada de dominio do modulo Biblioteca de Estudos (study) seguindo TDD — 91 testes.
+
+### Detalhes
+
+- **Erros de dominio**: 10 classes de erro em `StudyErrors.ts` (StudyItemNotFound, CollectionNotFound, InvalidStudyItemTitle, InvalidStudyItemType, InvalidProgress, InvalidRating, InvalidStudyStatusTransition, InvalidCollectionName, InvalidStudyNote, InvalidStudySession, InvalidStudyTagName)
+- **Value Object Progress**: 3 tipos — simple (currentValue=0, sem total), percentage (0-100 com validacao), chapters (current/total com calculo %, rejeita current>total e total<=0)
+- **Value Object StudyTag**: nome obrigatorio com trim, cor opcional, independente de tags de outros contextos
+- **Entidade StudyItem (aggregate root)**: tipos book/course/article/podcast/video/other, lifecycle backlog→in_progress→completed|dropped, progresso auto-atualiza status (percentage 100%=completed, chapters current=total=completed), rating 1-5 so quando completed, start/complete/drop/reopen/restart, startedAt na primeira transicao, completedAt limpo ao recomecar
+- **Entidade Collection**: nome obrigatorio (max 100 chars), descricao/cor/icone opcionais, order para reordenacao
+- **Entidade StudyNote**: conteudo obrigatorio, vinculada a studyItemId, gerenciamento de StudyTags (add/remove), updatedAt automatico ao editar
+- **Entidade StudySession**: scheduledAt + durationMinutes obrigatorios (duracao>0), status scheduled→completed|skipped, calendarEventId para integracao, reschedule para reagendar, completedAt ao completar
+- **Testes**: 91 testes — Progress (10), StudyTag (6), StudyItem (35), Collection (10), StudyNote (12), StudySession (13), sem NENHUMA implementacao pendente (5 restam para use case)
