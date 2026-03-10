@@ -84,15 +84,15 @@ function HabitCard({ habit }: { habit: HabitDTO }) {
       <View className="flex-row items-center">
         <View
           className="w-12 h-12 rounded-xl items-center justify-center mr-4"
-          style={{ backgroundColor: habit.color ?? '#e0eaff' }}
+          style={{ backgroundColor: '#e0eaff' }}
         >
-          <Text className="text-2xl">{habit.emoji ?? (isBuild ? '✨' : '🚫')}</Text>
+          <Text className="text-2xl">{isBuild ? '✨' : '🚫'}</Text>
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{habit.title}</Text>
-          {isBuild && habit.goalValue ? (
+          <Text className="text-base font-semibold text-gray-900">{habit.name}</Text>
+          {isBuild && habit.goal ? (
             <Text className="text-sm text-gray-500 mt-0.5">
-              Meta: {habit.goalValue} {habit.goalUnit ?? ''}
+              Meta: {habit.goal.target_value} {habit.goal.target_unit ?? ''}
             </Text>
           ) : null}
           {!isBuild ? (

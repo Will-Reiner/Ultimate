@@ -9,6 +9,11 @@ import { UpdateHabitUseCase } from '../application/use-cases/UpdateHabitUseCase'
 import { DeleteHabitUseCase } from '../application/use-cases/DeleteHabitUseCase';
 import { GetEntriesUseCase } from '../application/use-cases/GetEntriesUseCase';
 import { CreateEntryUseCase } from '../application/use-cases/CreateEntryUseCase';
+import { PauseHabitUseCase } from '../application/use-cases/PauseHabitUseCase';
+import { ArchiveHabitUseCase } from '../application/use-cases/ArchiveHabitUseCase';
+import { ReactivateHabitUseCase } from '../application/use-cases/ReactivateHabitUseCase';
+import { GetStreakUseCase } from '../application/use-cases/GetStreakUseCase';
+import { EvaluateGoalUseCase } from '../application/use-cases/EvaluateGoalUseCase';
 import { HabitsService } from './habits.service';
 import { HabitsController } from './habits.controller';
 
@@ -23,6 +28,11 @@ import { HabitsController } from './habits.controller';
     DeleteHabitUseCase,
     GetEntriesUseCase,
     CreateEntryUseCase,
+    PauseHabitUseCase,
+    ArchiveHabitUseCase,
+    ReactivateHabitUseCase,
+    GetStreakUseCase,
+    EvaluateGoalUseCase,
     HabitsService,
   ],
   controllers: [HabitsController],

@@ -16,39 +16,96 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   habits    Habit[]
+  tags      Tag[]
 
   @@map("users")
 }
 
+model Category {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  icon   String
+  color  String
+  habits Habit[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id     String     @id @default(uuid())
+  userId String     @map("user_id")
+  name   String
+  color  String
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habits HabitTag[]
+
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+model HabitTag {
+  habitId String @map("habit_id")
+  tagId   String @map("tag_id")
+  habit   Habit  @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([habitId, tagId])
+  @@map("habit_tags")
+}
+
+model Reminder {
+  id      String @id @default(uuid())
+  habitId String @map("habit_id")
+  time    String // HH:mm
+  habit   Habit  @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@map("reminders")
+}
+
 model Habit {
-  id            String       @id @default(uuid())
-  userId        String       @map("user_id")
-  title         String
-  description   String?
-  emoji         String?
-  type          String       @default("build")
-  frequencyType String       @map("frequency_type")
-  daysOfWeek    Int[]        @map("days_of_week")
-  goalValue     Int?         @map("goal_value")
-  goalUnit      String?      @map("goal_unit")
-  reminderTime  String?      @map("reminder_time")
-  color         String?
-  isArchived    Boolean      @default(false) @map("is_archived")
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entries       HabitEntry[]
+  id                     String       @id @default(uuid())
+  userId                 String       @map("user_id")
+  name                   String
+  description            String?
+  type                   String       @default("build")
+  trackingMode           String       @default("boolean") @map("tracking_mode")
+  dailyTarget            Int?         @map("daily_target")
+  targetUnit             String?      @map("target_unit")
+  frequencyType          String       @map("frequency_type")
+  frequencyTimesPerWeek  Int?         @map("frequency_times_per_week")
+  frequencyDays          Int[]        @map("frequency_days")
+  frequencyEveryNDays    Int?         @map("frequency_every_n_days")
+  goalType               String?      @map("goal_type")
+  goalTargetValue        Int?         @map("goal_target_value")
+  goalTargetUnit         String?      @map("goal_target_unit")
+  goalDeadline           DateTime?    @map("goal_deadline")
+  goalStatus             String?      @map("goal_status")
+  categoryId             String?      @map("category_id")
+  status                 String       @default("active")
+  trackRelapseIntensity  Boolean      @default(false) @map("track_relapse_intensity")
+  trackRelapseTrigger    Boolean      @default(false) @map("track_relapse_trigger")
+  createdAt              DateTime     @default(now()) @map("created_at")
+  updatedAt              DateTime     @updatedAt @map("updated_at")
+  user                   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category               Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  entries                HabitEntry[]
+  tags                   HabitTag[]
+  reminders              Reminder[]
 
   @@map("habits")
 }
 
 model HabitEntry {
-  id          String   @id @default(uuid())
-  habitId     String   @map("habit_id")
-  completedAt DateTime @map("completed_at")
-  value       Int      @default(1)
-  note        String?
-  habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  id        String   @id @default(uuid())
+  habitId   String   @map("habit_id")
+  date      String   // YYYY-MM-DD
+  entryType String   @default("check_in") @map("entry_type")
+  value     Int      @default(1)
+  note      String?
+  intensity Int?
+  trigger   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
   @@map("habit_entries")
 }

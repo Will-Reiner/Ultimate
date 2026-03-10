@@ -8,11 +8,11 @@ export class GetEntriesUseCase {
     @Inject(HABIT_REPOSITORY) private readonly habitRepository: IHabitRepository,
   ) {}
 
-  async execute(habitId: string, userId: string, from: Date, to: Date): Promise<EntryResponseDto[]> {
+  async execute(habitId: string, userId: string, from: string, to: string, entryType?: string): Promise<EntryResponseDto[]> {
     const habit = await this.habitRepository.findOne(habitId, userId);
     if (!habit) throw new NotFoundException('Hábito não encontrado.');
 
-    const entries = await this.habitRepository.getEntries(habitId, from, to);
+    const entries = await this.habitRepository.getEntries(habitId, from, to, entryType);
     return entries.map(toEntryResponseDto);
   }
 }

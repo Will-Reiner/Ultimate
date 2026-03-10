@@ -22,7 +22,7 @@ export default function HabitDetailScreen() {
     selectedDetail,
     isLoading,
     fetchHabitDetail,
-    completeHabit,
+    addEntry,
     archiveHabit,
   } = useHabits();
 
@@ -48,13 +48,13 @@ export default function HabitDetailScreen() {
   const firstDayOfWeek = new Date(year, month, 1).getDay();
 
   const completedDays = new Set(
-    monthEntries.map((e) => new Date(e.completedAt).getDate()),
+    monthEntries.map((e) => new Date(e.date).getDate()),
   );
 
   async function handleComplete() {
     if (!id) return;
     try {
-      await completeHabit(id);
+      await addEntry(id, {});
       fetchHabitDetail(id);
     } catch {
       Alert.alert('Erro', 'Nao foi possivel registrar.');
@@ -87,7 +87,7 @@ export default function HabitDetailScreen() {
           <Text className="text-primary-600 text-base">{'< Voltar'}</Text>
         </TouchableOpacity>
         <Text className="text-xl font-bold text-gray-900 flex-1" numberOfLines={1}>
-          {habit.title}
+          {habit.name}
         </Text>
       </View>
 
@@ -96,32 +96,32 @@ export default function HabitDetailScreen() {
         <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm items-center">
           <View
             className="w-16 h-16 rounded-2xl items-center justify-center mb-3"
-            style={{ backgroundColor: habit.color ?? '#e0eaff' }}
+            style={{ backgroundColor: '#e0eaff' }}
           >
-            <Text className="text-3xl">{habit.emoji ?? (isBuild ? '✨' : '🚫')}</Text>
+            <Text className="text-3xl">{isBuild ? '✨' : '🚫'}</Text>
           </View>
-          <Text className="text-lg font-bold text-gray-900">{habit.title}</Text>
+          <Text className="text-lg font-bold text-gray-900">{habit.name}</Text>
           <Text className="text-sm text-gray-500 mt-1">
             {isBuild ? 'Construir' : 'Largar'} · {habit.frequency.type === 'daily' ? 'Diario' : 'Semanal'}
           </Text>
-          {isBuild && habit.goalValue ? (
+          {isBuild && habit.goal ? (
             <Text className="text-sm text-primary-600 mt-1">
-              Meta: {habit.goalValue} {habit.goalUnit ?? ''}
+              Meta: {habit.goal.target_value} {habit.goal.target_unit ?? ''}
             </Text>
           ) : null}
-          {habit.reminderTime ? (
-            <Text className="text-sm text-gray-400 mt-1">Lembrete: {habit.reminderTime}</Text>
+          {habit.reminders.length > 0 ? (
+            <Text className="text-sm text-gray-400 mt-1">Lembrete: {habit.reminders[0]}</Text>
           ) : null}
         </View>
 
         {/* Streaks */}
         <View className="flex-row mb-4">
           <View className="flex-1 bg-white rounded-2xl p-4 mr-2 shadow-sm items-center">
-            <Text className="text-3xl font-bold text-primary-600">{streak.currentStreak}</Text>
+            <Text className="text-3xl font-bold text-primary-600">{streak.current_streak}</Text>
             <Text className="text-xs text-gray-500 mt-1">Streak atual</Text>
           </View>
           <View className="flex-1 bg-white rounded-2xl p-4 ml-2 shadow-sm items-center">
-            <Text className="text-3xl font-bold text-amber-500">{streak.bestStreak}</Text>
+            <Text className="text-3xl font-bold text-amber-500">{streak.longest_streak}</Text>
             <Text className="text-xs text-gray-500 mt-1">Melhor streak</Text>
           </View>
         </View>

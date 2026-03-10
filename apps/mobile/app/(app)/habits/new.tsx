@@ -8,59 +8,44 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useHabits } from '@hooks/useHabits';
-import { useAuth } from '@hooks/useAuth';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { HabitType, FrequencyType } from '@app-types/habit';
 
-const COLORS = ['#e0eaff', '#dbeafe', '#d1fae5', '#fef3c7', '#fce7f3', '#ede9fe', '#fee2e2'];
-const EMOJIS_BUILD = ['💪', '📚', '🧘', '🏃', '💧', '🥗', '✍️', '🎯'];
-const EMOJIS_QUIT = ['🚫', '🚭', '🍺', '📱', '🍩', '☕', '🎮', '⏰'];
-
 export default function NewHabitScreen() {
   const { createHabit, isLoading } = useHabits();
-  const { user } = useAuth();
 
   const [type, setType] = useState<HabitType>('build');
-  const [title, setTitle] = useState('');
-  const [emoji, setEmoji] = useState('');
+  const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [frequencyType, setFrequencyType] = useState<FrequencyType>('daily');
-  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
+  const [frequencyDays, setFrequencyDays] = useState<number[]>([]);
   const [goalValue, setGoalValue] = useState('');
   const [goalUnit, setGoalUnit] = useState('');
   const [reminderTime, setReminderTime] = useState('');
-  const [color, setColor] = useState(COLORS[0]);
-
-  const emojis = type === 'build' ? EMOJIS_BUILD : EMOJIS_QUIT;
 
   const toggleDay = (day: number) => {
-    setDaysOfWeek((prev) =>
+    setFrequencyDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort(),
     );
   };
 
   async function handleSubmit() {
-    if (!user?.id || !title.trim()) {
+    if (!name.trim()) {
       Alert.alert('Erro', 'Preencha o titulo do habito.');
       return;
     }
 
     try {
       await createHabit({
-        userId: user.id,
-        title: title.trim(),
+        name: name.trim(),
         description: description.trim() || undefined,
-        emoji: emoji || undefined,
         type,
-        frequency: {
-          type: frequencyType,
-          ...(frequencyType === 'weekly' ? { daysOfWeek } : {}),
-        },
-        goalValue: goalValue ? parseInt(goalValue, 10) : undefined,
-        goalUnit: goalUnit.trim() || undefined,
-        reminderTime: reminderTime.trim() || undefined,
-        color,
+        frequency_type: frequencyType,
+        ...(frequencyType === 'weekly' ? { frequency_days: frequencyDays } : {}),
+        goal_target_value: goalValue ? parseInt(goalValue, 10) : undefined,
+        goal_target_unit: goalUnit.trim() || undefined,
+        reminders: reminderTime.trim() ? [reminderTime.trim()] : undefined,
       });
       router.back();
     } catch {
@@ -104,23 +89,9 @@ export default function NewHabitScreen() {
         <Input
           label="Titulo"
           placeholder="Ex: Beber agua"
-          value={title}
-          onChangeText={setTitle}
+          value={name}
+          onChangeText={setName}
         />
-
-        {/* Emoji picker */}
-        <Text className="text-sm font-medium text-gray-700 mb-2">Emoji</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-          {emojis.map((e) => (
-            <TouchableOpacity
-              key={e}
-              className={`w-12 h-12 rounded-xl items-center justify-center mr-2 ${emoji === e ? 'bg-primary-100 border-2 border-primary-500' : 'bg-gray-100'}`}
-              onPress={() => setEmoji(e)}
-            >
-              <Text className="text-2xl">{e}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
 
         {/* Frequency */}
         <Text className="text-sm font-medium text-gray-700 mb-2">Frequencia</Text>
@@ -148,10 +119,10 @@ export default function NewHabitScreen() {
             {DAYS.map((day, i) => (
               <TouchableOpacity
                 key={day}
-                className={`w-10 h-10 rounded-full items-center justify-center ${daysOfWeek.includes(i) ? 'bg-primary-600' : 'bg-gray-200'}`}
+                className={`w-10 h-10 rounded-full items-center justify-center ${frequencyDays.includes(i) ? 'bg-primary-600' : 'bg-gray-200'}`}
                 onPress={() => toggleDay(i)}
               >
-                <Text className={`text-xs font-medium ${daysOfWeek.includes(i) ? 'text-white' : 'text-gray-600'}`}>
+                <Text className={`text-xs font-medium ${frequencyDays.includes(i) ? 'text-white' : 'text-gray-600'}`}>
                   {day}
                 </Text>
               </TouchableOpacity>
@@ -182,19 +153,6 @@ export default function NewHabitScreen() {
           </View>
         )}
 
-        {/* Color */}
-        <Text className="text-sm font-medium text-gray-700 mb-2">Cor</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-          {COLORS.map((c) => (
-            <TouchableOpacity
-              key={c}
-              className={`w-10 h-10 rounded-full mr-2 ${color === c ? 'border-2 border-primary-500' : ''}`}
-              style={{ backgroundColor: c }}
-              onPress={() => setColor(c)}
-            />
-          ))}
-        </ScrollView>
-
         {/* Reminder */}
         <Input
           label="Lembrete (HH:mm)"
@@ -218,7 +176,7 @@ export default function NewHabitScreen() {
             label="Criar Habito"
             onPress={handleSubmit}
             isLoading={isLoading}
-            disabled={!title.trim()}
+            disabled={!name.trim()}
           />
         </View>
       </ScrollView>

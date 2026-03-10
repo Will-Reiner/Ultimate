@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -28,8 +29,11 @@ export class HabitsController {
   constructor(private readonly habitsService: HabitsService) {}
 
   @Get()
-  findAll(@Request() req: AuthenticatedRequest) {
-    return this.habitsService.findAll(req.user.id);
+  findAll(
+    @Query('status') status: string | undefined,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.habitsService.findAll(req.user.id, status as any);
   }
 
   @Get(':id')
@@ -52,10 +56,39 @@ export class HabitsController {
     return this.habitsService.update(id, req.user.id, dto);
   }
 
+  @Patch(':id/pause')
+  @HttpCode(HttpStatus.OK)
+  pause(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.habitsService.pause(id, req.user.id);
+  }
+
+  @Patch(':id/archive')
+  @HttpCode(HttpStatus.OK)
+  archive(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.habitsService.archive(id, req.user.id);
+  }
+
+  @Patch(':id/reactivate')
+  @HttpCode(HttpStatus.OK)
+  reactivate(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.habitsService.reactivate(id, req.user.id);
+  }
+
+  @Patch(':id/goal/evaluate')
+  @HttpCode(HttpStatus.OK)
+  evaluateGoal(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.habitsService.evaluateGoal(id, req.user.id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.habitsService.remove(id, req.user.id);
+  }
+
+  @Get(':id/streak')
+  getStreak(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.habitsService.getStreak(id, req.user.id);
   }
 
   @Get(':id/entries')
@@ -63,14 +96,17 @@ export class HabitsController {
     @Param('id') id: string,
     @Query('from') from: string,
     @Query('to') to: string,
+    @Query('entry_type') entryType: string | undefined,
     @Request() req: AuthenticatedRequest,
   ) {
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const today = new Date().toISOString().slice(0, 10);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     return this.habitsService.listEntries(
       id,
       req.user.id,
-      from ? new Date(from) : thirtyDaysAgo,
-      to ? new Date(to) : new Date(),
+      from || thirtyDaysAgo,
+      to || today,
+      entryType,
     );
   }
 

@@ -6,75 +6,125 @@ import { UpdateHabitUseCase } from '../application/use-cases/UpdateHabitUseCase'
 import { DeleteHabitUseCase } from '../application/use-cases/DeleteHabitUseCase';
 import { GetEntriesUseCase } from '../application/use-cases/GetEntriesUseCase';
 import { CreateEntryUseCase } from '../application/use-cases/CreateEntryUseCase';
+import { PauseHabitUseCase } from '../application/use-cases/PauseHabitUseCase';
+import { ArchiveHabitUseCase } from '../application/use-cases/ArchiveHabitUseCase';
+import { ReactivateHabitUseCase } from '../application/use-cases/ReactivateHabitUseCase';
+import { GetStreakUseCase } from '../application/use-cases/GetStreakUseCase';
+import { EvaluateGoalUseCase } from '../application/use-cases/EvaluateGoalUseCase';
 import { CreateHabitDto } from './dtos/create-habit.dto';
 import { UpdateHabitDto } from './dtos/update-habit.dto';
 import { CreateEntryDto } from './dtos/create-entry.dto';
+import { HabitStatus } from '../domain/entities/Habit';
 
 @Injectable()
 export class HabitsService {
   constructor(
-    private readonly getHabits: GetHabitsUseCase,
-    private readonly getHabit: GetHabitUseCase,
-    private readonly createHabit: CreateHabitUseCase,
-    private readonly updateHabit: UpdateHabitUseCase,
-    private readonly deleteHabit: DeleteHabitUseCase,
-    private readonly getEntries: GetEntriesUseCase,
-    private readonly createEntry: CreateEntryUseCase,
+    private readonly getHabitsUC: GetHabitsUseCase,
+    private readonly getHabitUC: GetHabitUseCase,
+    private readonly createHabitUC: CreateHabitUseCase,
+    private readonly updateHabitUC: UpdateHabitUseCase,
+    private readonly deleteHabitUC: DeleteHabitUseCase,
+    private readonly getEntriesUC: GetEntriesUseCase,
+    private readonly createEntryUC: CreateEntryUseCase,
+    private readonly pauseHabitUC: PauseHabitUseCase,
+    private readonly archiveHabitUC: ArchiveHabitUseCase,
+    private readonly reactivateHabitUC: ReactivateHabitUseCase,
+    private readonly getStreakUC: GetStreakUseCase,
+    private readonly evaluateGoalUC: EvaluateGoalUseCase,
   ) {}
 
-  findAll(userId: string) {
-    return this.getHabits.execute(userId);
+  findAll(userId: string, status?: HabitStatus) {
+    return this.getHabitsUC.execute(userId, status);
   }
 
   findOne(id: string, userId: string) {
-    return this.getHabit.execute(id, userId);
+    return this.getHabitUC.execute(id, userId);
   }
 
   create(userId: string, dto: CreateHabitDto) {
-    return this.createHabit.execute({
+    return this.createHabitUC.execute({
       userId,
-      title: dto.title,
+      name: dto.name,
       description: dto.description,
-      emoji: dto.emoji,
-      type: dto.type,
+      type: dto.type ?? 'build',
+      trackingMode: dto.tracking_mode ?? 'boolean',
+      dailyTarget: dto.daily_target,
+      targetUnit: dto.target_unit,
       frequencyType: dto.frequency_type,
-      daysOfWeek: dto.days_of_week,
-      goalValue: dto.goal_value,
-      goalUnit: dto.goal_unit,
-      reminderTime: dto.reminder_time,
-      color: dto.color,
+      frequencyTimesPerWeek: dto.frequency_times_per_week,
+      frequencyDays: dto.frequency_days,
+      frequencyEveryNDays: dto.frequency_every_n_days,
+      goalType: dto.goal_type,
+      goalTargetValue: dto.goal_target_value,
+      goalTargetUnit: dto.goal_target_unit,
+      goalDeadline: dto.goal_deadline,
+      categoryId: dto.category_id,
+      trackRelapseIntensity: dto.track_relapse_intensity,
+      trackRelapseTrigger: dto.track_relapse_trigger,
+      tagIds: dto.tag_ids,
+      reminders: dto.reminders,
     });
   }
 
   update(id: string, userId: string, dto: UpdateHabitDto) {
-    return this.updateHabit.execute(id, userId, {
-      title: dto.title,
+    return this.updateHabitUC.execute(id, userId, {
+      name: dto.name,
       description: dto.description,
-      emoji: dto.emoji,
-      type: dto.type,
+      trackingMode: dto.tracking_mode,
+      dailyTarget: dto.daily_target,
+      targetUnit: dto.target_unit,
       frequencyType: dto.frequency_type,
-      daysOfWeek: dto.days_of_week,
-      goalValue: dto.goal_value,
-      goalUnit: dto.goal_unit,
-      reminderTime: dto.reminder_time,
-      color: dto.color,
-      isArchived: dto.is_archived,
+      frequencyTimesPerWeek: dto.frequency_times_per_week,
+      frequencyDays: dto.frequency_days,
+      frequencyEveryNDays: dto.frequency_every_n_days,
+      goalType: dto.goal_type,
+      goalTargetValue: dto.goal_target_value,
+      goalTargetUnit: dto.goal_target_unit,
+      goalDeadline: dto.goal_deadline,
+      categoryId: dto.category_id,
+      trackRelapseIntensity: dto.track_relapse_intensity,
+      trackRelapseTrigger: dto.track_relapse_trigger,
+      tagIds: dto.tag_ids,
+      reminders: dto.reminders,
     });
   }
 
-  remove(id: string, userId: string) {
-    return this.deleteHabit.execute(id, userId);
+  pause(id: string, userId: string) {
+    return this.pauseHabitUC.execute(id, userId);
   }
 
-  listEntries(habitId: string, userId: string, from: Date, to: Date) {
-    return this.getEntries.execute(habitId, userId, from, to);
+  archive(id: string, userId: string) {
+    return this.archiveHabitUC.execute(id, userId);
+  }
+
+  reactivate(id: string, userId: string) {
+    return this.reactivateHabitUC.execute(id, userId);
+  }
+
+  remove(id: string, userId: string) {
+    return this.deleteHabitUC.execute(id, userId);
+  }
+
+  getStreak(id: string, userId: string) {
+    return this.getStreakUC.execute(id, userId);
+  }
+
+  evaluateGoal(id: string, userId: string) {
+    return this.evaluateGoalUC.execute(id, userId);
+  }
+
+  listEntries(habitId: string, userId: string, from: string, to: string, entryType?: string) {
+    return this.getEntriesUC.execute(habitId, userId, from, to, entryType);
   }
 
   addEntry(habitId: string, userId: string, dto: CreateEntryDto) {
-    return this.createEntry.execute(habitId, userId, {
-      completedAt: dto.completed_at,
+    return this.createEntryUC.execute(habitId, userId, {
+      date: dto.date,
+      entryType: dto.entry_type,
       value: dto.value,
       note: dto.note,
+      intensity: dto.intensity,
+      trigger: dto.trigger,
     });
   }
 }

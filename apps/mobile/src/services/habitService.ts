@@ -6,213 +6,91 @@ import {
   StreakDTO,
   CreateHabitInput,
   UpdateHabitInput,
-  FrequencyType,
+  CreateEntryInput,
+  HabitStatus,
 } from '../types/habit';
-
-// ─── API response shapes ───────────────────────────────────────────────────
-
-interface ApiHabit {
-  id: string;
-  user_id: string;
-  title: string;
-  description?: string;
-  emoji?: string;
-  type: string;
-  frequency_type: string;
-  days_of_week?: number[];
-  goal_value?: number | null;
-  goal_unit?: string | null;
-  reminder_time?: string | null;
-  color?: string;
-  is_archived: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-interface ApiEntry {
-  id: string;
-  habit_id: string;
-  completed_at: string;
-  value: number;
-  note?: string;
-}
-
-// ─── Mappers ───────────────────────────────────────────────────────────────
-
-function mapHabit(raw: ApiHabit): HabitDTO {
-  return {
-    id: raw.id,
-    userId: raw.user_id,
-    title: raw.title,
-    description: raw.description,
-    emoji: raw.emoji,
-    type: raw.type as HabitDTO['type'],
-    frequency: {
-      type: raw.frequency_type as FrequencyType,
-      daysOfWeek: raw.days_of_week,
-    },
-    goalValue: raw.goal_value ?? undefined,
-    goalUnit: raw.goal_unit ?? undefined,
-    reminderTime: raw.reminder_time ?? undefined,
-    color: raw.color,
-    isArchived: raw.is_archived,
-    createdAt: raw.created_at,
-    updatedAt: raw.updated_at,
-  };
-}
-
-function mapEntry(raw: ApiEntry): HabitEntryDTO {
-  return {
-    id: raw.id,
-    habitId: raw.habit_id,
-    completedAt: raw.completed_at,
-    value: raw.value,
-    note: raw.note,
-  };
-}
-
-// ─── Streak calculation ────────────────────────────────────────────────────
-
-function isActiveOn(date: Date, frequencyType: FrequencyType, daysOfWeek?: number[]): boolean {
-  if (frequencyType === 'daily') return true;
-  return daysOfWeek?.includes(date.getDay()) ?? false;
-}
-
-function calculateStreak(
-  entries: HabitEntryDTO[],
-  frequencyType: FrequencyType,
-  daysOfWeek?: number[],
-): StreakDTO {
-  if (entries.length === 0) return { currentStreak: 0, bestStreak: 0 };
-
-  const completedDays = new Set<string>();
-  for (const e of entries) {
-    const d = new Date(e.completedAt);
-    completedDays.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
-  }
-
-  let currentStreak = 0;
-  let bestStreak = 0;
-  let streak = 0;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const cursor = new Date(today);
-  let isCurrentStreakOpen = true;
-
-  for (let i = 0; i < 365; i++) {
-    const key = `${cursor.getFullYear()}-${cursor.getMonth()}-${cursor.getDate()}`;
-
-    if (isActiveOn(cursor, frequencyType, daysOfWeek)) {
-      if (completedDays.has(key)) {
-        streak++;
-        if (streak > bestStreak) bestStreak = streak;
-      } else {
-        if (i === 0 && isCurrentStreakOpen) {
-          // today not yet completed — don't break streak
-        } else {
-          if (isCurrentStreakOpen) {
-            currentStreak = streak;
-            isCurrentStreakOpen = false;
-          }
-          streak = 0;
-        }
-      }
-    }
-
-    cursor.setDate(cursor.getDate() - 1);
-  }
-
-  if (isCurrentStreakOpen) currentStreak = streak;
-
-  return { currentStreak, bestStreak };
-}
 
 // ─── Service functions ─────────────────────────────────────────────────────
 
-export async function getHabits(): Promise<HabitDTO[]> {
-  const data = await api.get<ApiHabit[]>('/habits');
-  return data.map(mapHabit);
+export async function getHabits(status?: HabitStatus): Promise<HabitDTO[]> {
+  const query = status ? `?status=${status}` : '';
+  return api.get<HabitDTO[]>(`/habits${query}`);
 }
 
 export async function getHabit(id: string): Promise<HabitDTO> {
-  const data = await api.get<ApiHabit>(`/habits/${id}`);
-  return mapHabit(data);
+  return api.get<HabitDTO>(`/habits/${id}`);
 }
 
 export async function createHabit(input: CreateHabitInput): Promise<HabitDTO> {
-  const data = await api.post<ApiHabit>('/habits', {
-    title: input.title,
-    description: input.description,
-    emoji: input.emoji,
-    type: input.type,
-    frequency_type: input.frequency.type,
-    days_of_week: input.frequency.daysOfWeek ?? [],
-    goal_value: input.goalValue,
-    goal_unit: input.goalUnit,
-    reminder_time: input.reminderTime,
-    color: input.color,
-  });
-  return mapHabit(data);
+  return api.post<HabitDTO>('/habits', input);
 }
 
 export async function updateHabit(id: string, input: UpdateHabitInput): Promise<HabitDTO> {
-  const data = await api.put<ApiHabit>(`/habits/${id}`, {
-    ...(input.title !== undefined && { title: input.title }),
-    ...(input.description !== undefined && { description: input.description }),
-    ...(input.emoji !== undefined && { emoji: input.emoji }),
-    ...(input.type !== undefined && { type: input.type }),
-    ...(input.frequency !== undefined && {
-      frequency_type: input.frequency.type,
-      days_of_week: input.frequency.daysOfWeek ?? [],
-    }),
-    ...(input.goalValue !== undefined && { goal_value: input.goalValue }),
-    ...(input.goalUnit !== undefined && { goal_unit: input.goalUnit }),
-    ...(input.reminderTime !== undefined && { reminder_time: input.reminderTime }),
-    ...(input.color !== undefined && { color: input.color }),
-  });
-  return mapHabit(data);
-}
-
-export async function archiveHabit(id: string): Promise<HabitDTO> {
-  const data = await api.put<ApiHabit>(`/habits/${id}`, { is_archived: true });
-  return mapHabit(data);
+  return api.put<HabitDTO>(`/habits/${id}`, input);
 }
 
 export async function deleteHabit(id: string): Promise<void> {
   await api.delete(`/habits/${id}`);
 }
 
-export async function completeHabit(
+export async function pauseHabit(id: string): Promise<HabitDTO> {
+  return api.patch<HabitDTO>(`/habits/${id}/pause`);
+}
+
+export async function archiveHabit(id: string): Promise<HabitDTO> {
+  return api.patch<HabitDTO>(`/habits/${id}/archive`);
+}
+
+export async function reactivateHabit(id: string): Promise<HabitDTO> {
+  return api.patch<HabitDTO>(`/habits/${id}/reactivate`);
+}
+
+export async function getStreak(habitId: string): Promise<StreakDTO> {
+  return api.get<StreakDTO>(`/habits/${habitId}/streak`);
+}
+
+export async function getEntries(
   habitId: string,
-  value = 1,
-  note?: string,
+  from?: string,
+  to?: string,
+  entryType?: string,
+): Promise<HabitEntryDTO[]> {
+  const params = new URLSearchParams();
+  if (from) params.set('from', from);
+  if (to) params.set('to', to);
+  if (entryType) params.set('entry_type', entryType);
+  const query = params.toString() ? `?${params.toString()}` : '';
+  return api.get<HabitEntryDTO[]>(`/habits/${habitId}/entries${query}`);
+}
+
+export async function createEntry(
+  habitId: string,
+  input: CreateEntryInput,
 ): Promise<HabitEntryDTO> {
-  const data = await api.post<ApiEntry>(`/habits/${habitId}/entries`, { value, note });
-  return mapEntry(data);
+  return api.post<HabitEntryDTO>(`/habits/${habitId}/entries`, input);
+}
+
+export async function evaluateGoal(habitId: string): Promise<HabitDTO> {
+  return api.patch<HabitDTO>(`/habits/${habitId}/goal/evaluate`);
 }
 
 export async function getHabitDetail(habitId: string): Promise<HabitDetailDTO> {
-  const habit = await getHabit(habitId);
+  const [habit, streak] = await Promise.all([
+    getHabit(habitId),
+    getStreak(habitId),
+  ]);
 
   const now = new Date();
-  const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const to = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+  const from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const to = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-01`;
 
-  const entries = await api
-    .get<ApiEntry[]>(`/habits/${habitId}/entries?from=${from}&to=${to}`)
-    .then((rows) => rows.map(mapEntry));
+  const monthEntries = await getEntries(habitId, from, to);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const completedToday = entries.some((e) => {
-    const d = new Date(e.completedAt);
-    return d >= today && d < tomorrow;
-  });
+  const todayStr = now.toISOString().slice(0, 10);
+  const completedToday = monthEntries.some(
+    (e) => e.date === todayStr && e.entry_type === 'check_in',
+  );
 
-  const streak = calculateStreak(entries, habit.frequency.type, habit.frequency.daysOfWeek);
-
-  return { habit, streak, monthEntries: entries, completedToday };
+  return { habit, streak, monthEntries, completedToday };
 }
