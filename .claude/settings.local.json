@@ -7,7 +7,9 @@
       "Bash(npx prisma:*)",
       "mcp__ide__getDiagnostics",
       "Bash(ls:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(find /c/Users/willi/Cursor\\\\ Projects/Ultimate -type d -name \"*tdd*\" -o -type d -name \"*plan*\" 2>/dev/null | grep -v node_modules)",
+      "Bash(cd \"C:\\\\Users\\\\willi\\\\Cursor Projects\\\\Ultimate\\\\.worktrees\\\\dashboard\\\\apps\\\\api\" && npm install 2>&1 | tail -3)"
     ]
   }
 }

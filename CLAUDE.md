@@ -253,5 +253,4 @@ docker build --target production -t ultimate-api ./apps/api
 
 
 ## to do
-- 6-financas.md
 - 7-dashboard-metas.md
