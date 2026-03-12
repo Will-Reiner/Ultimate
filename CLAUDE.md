@@ -253,4 +253,4 @@ docker build --target production -t ultimate-api ./apps/api
 
 
 ## to do
-- 7-dashboard-metas.md
+- 7-dashboard-metas.md - DONE

@@ -89,3 +89,17 @@ Implementacao completa da camada de dominio do modulo Financas (finance) seguind
 - **Entidade Budget**: mes formato YYYY-MM validado por regex, generalLimit > 0 opcional, categoryLimits (array de CategoryLimit VOs) com add/replace por categoryId e remove, getCategoryLimit, copia defensiva no getter
 - **Entidade FinancialGoal**: nome max 200, targetAmount > 0, status in_progress→completed|failed, updateCurrentAmount auto-completa quando >= targetAmount, calculateProgress (0-100 capped), complete/markFailed so de in_progress, checkDeadline auto-fail se deadline passado, accountIds com dedup e copia defensiva
 - **Testes**: 386 testes — CategoryLimit (6), Installment (13), TransactionRecurrence (17), FinanceTag (20), FinanceCategory (37), Account (49), CreditCard (64), Transaction (50), Invoice (30), Budget (35), FinancialGoal (65)
+
+## Implementacao 2026-03-11
+
+### Resumo
+
+Implementacao completa do modulo Dashboard — 7 domain services, 11 value objects, 6 inputs e testes para todos os contextos.
+
+### Detalhes
+
+- **Domain Services (7)**: `HomeDashboardService` (resumo do dia), `HabitDashboardService` (taxa de conclusao, streaks, heatmap, creditos, vicios, goals), `TaskDashboardService` (overdue, upcoming, distribuicao por prioridade, progresso por projeto), `CalendarDashboardService` (agregacao de eventos, densidade mensal, eventos por dia), `FinanceDashboardService` (saldos, despesas/receitas, orcamento), `StudyDashboardService` (overview por status e progresso), `JournalDashboardService` (grafico de humor, tendencias, frequencia de tags)
+- **Value Objects (11)**: `HomeSummary`, `HabitHeatmap`, `ViceMetrics`, `CompletionRate`, `CalendarDensity`, `TaskDistribution`, `ProjectProgress`, `StudyOverview`, `MoodGraph`, `MoodTrend`, `TagFrequency`
+- **Inputs (6)**: tipos de entrada para cada contexto (Habit, Task, Calendar, Finance, Study, Journal)
+- **Testes**: cobertura completa com specs para todos os 7 services e VOs relevantes
+- Removido plano de financas obsoleto (`2026-03-09-financas-domain.md`)
